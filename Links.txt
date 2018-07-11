@@ -1,0 +1,19 @@
+TRELLO - divisão e acompanhamento das tarefas
+	https://trello.com/b/db2ClHzO
+
+	
+
+Controlando Motor DC com Raspberry
+	https://business.tutsplus.com/tutorials/controlling-dc-motors-using-python-with-a-raspberry-pi--cms-20051
+
+	https://www.instructables.com/id/Raspberry-PI-L298N-Dual-H-Bridge-DC-Motor/
+
+	https://www.youtube.com/watch?v=bNOlimnWZJE
+
+Sensor de Distancia com Raspberry
+	https://tutorials-raspberrypi.com/raspberry-pi-ultrasonic-sensor-hc-sr04/
+
+	https://www.youtube.com/watch?v=sXJjfEisjpo
+
+Alimentação Raspberry 3
+	https://www.makeuseof.com/tag/pi-go-x-ways-powering-raspberry-pi-portable-projects/
