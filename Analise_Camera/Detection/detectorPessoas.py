@@ -17,7 +17,7 @@ classificador = cv2.CascadeClassifier('./haarcascades/haarcascade_fullbody.xml')
 
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 pedestres = classificador.detectMultiScale(gray,1.005,2)
-
+print(pedestres)
 for (x,y,w,h) in pedestres:
     cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,0))
 
