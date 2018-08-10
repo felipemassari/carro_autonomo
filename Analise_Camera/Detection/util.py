@@ -177,7 +177,7 @@ def semaforoValido(roi,contour):
 #leitura da primeira regiao considerada valida(funcao acima)
 def leSemaforo(img):
 	mask = detectaHSV(img,semaforo)
-	contours, hierarchy = cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
+	contours= cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
 	
 	for contour in contours:
 		roi = criaROIporContorno(img,contour)
