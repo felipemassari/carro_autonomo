@@ -50,6 +50,8 @@ cv.imshow("Carros detectados", deteccao)
 cv.waitKey(0)
 print("Carros detectados = "+str(carroDetectado))
 '''
+
+#teste de leitura de semaforo de uma imagem
 '''
 img = cv.imread("./images/semaforo2.jpeg")
 mask = detectaHSV(img,semaforo)
@@ -59,6 +61,8 @@ mostraImg(mask)
 print(leSemaforo(img))
 '''
 
+#teste de leitura do semaforo da camera
+'''
 cap = cv.VideoCapture(0)
 
 while(cap.isOpened()):
@@ -71,8 +75,18 @@ while(cap.isOpened()):
 cap.release()
 cv.destroyAllWindows()
 
+'''
 
+#teste de deteccao de obstaculos na pista
 
+cap = cv.VideoCapture(0)
 
+while(cap.isOpened()):
+	ret,frame = cap.read()
+	print(haObstaculoNaPista(frame))
+	cv.imshow("frame",frame)
+	if cv.waitKey(1) & 0xFF == ord('q'):
+		break
 
-
+cap.release()
+cv.destroyAllWindows()

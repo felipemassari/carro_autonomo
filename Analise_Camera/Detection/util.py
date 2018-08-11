@@ -73,20 +73,15 @@ def desvioDoCarro(img):
     #valores positivos => desvio para a direita
     return fatorDesvio*(qtdeD - qtdeE)
 
-#verifica se existe um objeto na pista, o criterio por enquanto eh se muito da rua estiver bloqueado entao tem um obstaculo
-'''
-Depois sera necessario melhorar: tenho que saber que regiao da camera
-estara vendo a rua para nao considerar o horizonte, que sera visto como
-obstaculo por enquanto. Vou ter que fazer uma ROI para considerar soh
-abaixo do horizonte, mas nao sei como a camera vai estar posicionada no
-carro. Eh possivel tambem mudar para detectar traseira de carros com
-haarcascades prontos (que nem fiz para pedestres) mas nao consegui fazer
-ser confiavel, dah muitas deteccoes erradas
-'''
+#verifica se existe um objeto na pista, o criterio por enquanto eh se
+#muito da rua estiver bloqueado entao tem um obstaculo, considerando 
+#a ROI da camera que enxerga a pista
+
 def haObstaculoNaPista(img):
-    detRua = detecta(img,rua)
-    qtdeRua = contaPixelsDetectados(detRua)
-    return qtdeRua<qtdeRuaEsperada
+	roiRua = ROIporPorcentagem(img,50,100,0,100)
+	detRua = detectaHSV(roiRua,rua)
+	qtdeRua = contaPixelsDetectados(detRua)
+	return qtdeRua<qtdeRuaEsperada
     
 '''
 o---> x
