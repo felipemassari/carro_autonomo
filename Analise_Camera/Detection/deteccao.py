@@ -50,5 +50,29 @@ cv.imshow("Carros detectados", deteccao)
 cv.waitKey(0)
 print("Carros detectados = "+str(carroDetectado))
 '''
-img = cv.imread("./images/teste4.png")
+'''
+img = cv.imread("./images/semaforo2.jpeg")
+mask = detectaHSV(img,semaforo)
+mostraImg(mask)
+#cv.imshow("sa",img)
+#cv.waitKey(0)
 print(leSemaforo(img))
+'''
+
+cap = cv.VideoCapture(0)
+
+while(cap.isOpened()):
+	ret,frame = cap.read()
+	print(leSemaforo(frame))
+	cv.imshow("frame",frame)
+	if cv.waitKey(1) & 0xFF == ord('q'):
+		break
+
+cap.release()
+cv.destroyAllWindows()
+
+
+
+
+
+

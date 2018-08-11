@@ -13,7 +13,7 @@ calcada = (calcada_min,calcada_max)
 
 #supondo cor preta - usar como ROI=>encontrar luz dentro da regiao
 semaforo_min = np.array([0,0,0])  
-semaforo_max = np.array([180,255,40])
+semaforo_max = np.array([180,255,60])
 semaforo = (semaforo_min,semaforo_max)
 
 #necessario 2 valores => vermelho esta entre ~350 a ~10 graus em HSV
@@ -36,7 +36,7 @@ verde = (luzVerde_min,luzVerde_max)
 #valores para calibrar depois
 fatorDesvio = 1.0 #usado para calcular o valor enviado aos motores
 qtdeRuaEsperada = 70000 #qtos pixels de rua se espera ver
-thresholdSemaforo = 10000 #qtos pixels para se considerar um semaforo
+thresholdSemaforo = 1000 #qtos pixels para se considerar um semaforo
 thresholdSinal = 500 #qtos pixels para se considerar sinal do semaforo
 
 #cor detectada - em branco
@@ -145,6 +145,11 @@ def numeroDePixelsEmContorno(contour):
 	dy = contour[2][0][1] - contour[0][0][1]
 	return dy*dx
 
+#mostra imagem e espera apertar uma tecla, apenas para debugar
+def mostraImg(img):
+	cv.imshow("teste",img)
+	cv.waitKey(0)
+
 #retorna o sinal de semaforo detectado mais provavel
 def sinalMaisForte(roi):
 	detVermelho = contaPixelsDetectados(detectaHSV(roi,vermelho1,vermelho2))
@@ -154,14 +159,15 @@ def sinalMaisForte(roi):
 		return "Sinal vermelho"
 	if detAmarelo>detVermelho and detAmarelo>detVerde:
 		return "Sinal amarelo"
-	return "Sinal verde"
-	
+	if detVerde>detVermelho and detVerde>detAmarelo:
+		return "Sinal verde"
+	return "Sem sinal"
 	
 #um semaforo valido eh aquele que possui vermelho, amarelo ou verde dentro #da regiao compreendida por ele. Esta funcao recebe a ROI do semaforo
 #e verifica se ha um minimo dessas cores e se sim, retorna True
 #Eh necessario tambem um minimo de pixels de semaforo para ser valido
-def semaforoValido(roi,contour):
-	if numeroDePixelsEmContorno(contour) < thresholdSemaforo:
+def semaforoValido(roi,largura,altura):
+	if largura*altura < thresholdSemaforo:
 		return False
 	else:
 		haAmarelo = contaPixelsDetectados(detectaHSV(roi,amarelo)) > thresholdSinal
@@ -177,9 +183,41 @@ def semaforoValido(roi,contour):
 #leitura da primeira regiao considerada valida(funcao acima)
 def leSemaforo(img):
 	mask = detectaHSV(img,semaforo)
-	contours= cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
+	_, contours, _ = cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
+	cor = (255,0,255)
+	
+	#para cada contorno detectado encontra um bounding box
+	for contour in contours:
+		#print(contour)
+		#print("1")
+		
+		
+		x,y,largura,altura = cv.boundingRect(contour)
+		roi = img[y:y+altura,x:x+largura]
+		if(semaforoValido(roi,largura,altura)):
+			cv.rectangle(img,(x,y),(x+largura, y+altura),cor,2)
+			
+			retangulo = cv.minAreaRect(contour)
+			caixa = cv.boxPoints(retangulo)
+			caixa = np.int0(caixa)
+			cv.drawContours(img,[caixa],0,cor,3)
+			return sinalMaisForte(roi)
+	#roi = img[y:y+altura,x:x+largura]
+	
+	return("Sem semaforo")
+
+
+'''
+def leSemaforo(img):
+	mask = detectaHSV(img,semaforo)
+	cv.imshow("mask",mask)
+	cv.waitKey(0)
+	_, contours, _ = cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
 	
 	for contour in contours:
+		print("--------")
+		print(contour)
+		if (contour[0].size)
 		roi = criaROIporContorno(img,contour)
 		if semaforoValido(roi, contour):
 			return sinalMaisForte(roi)
@@ -187,11 +225,15 @@ def leSemaforo(img):
 			#cv.rectangle(img2,tuple(contour[0][0]),tuple(contour[2][0]),(255,255,255),-1)
 	#cv.imshow("asd",img2)
 	#cv.waitKey(0)
-
+'''
 #dado um contorno(saida de cv.findContours), cria uma ROI
 def criaROIporContorno(img,contour):
-	return img[contour[0][0][1]:contour[2][0][1],contour[0][0][0]:contour[2][0][0]]
-	
+	try:
+		roi = img[contour[0][0][1]:contour[2][0][1],contour[0][0][0]:contour[2][0][0]]
+		return roi
+	except:
+		return imagemVazia(img)
+
 
 '''
 Abaixo estao funcoes que nao serao utilizadas mas vou deixar aqui por enquanto caso acabem tendo alguma utilidade
