@@ -29,18 +29,19 @@ luzAmarela_min = np.array([22,170,150])
 luzAmarela_max = np.array([30,255,255])
 amarelo = (luzAmarela_min,luzAmarela_max)
 
-luzVerde_min = np.array([40,170,150])
-luzVerde_max = np.array([70,255,255])
+luzVerde_min = np.array([54,94,150])
+luzVerde_max = np.array([80,164,255])
 verde = (luzVerde_min,luzVerde_max)
 
 #valores para calibrar depois
 fatorDesvio = 1.0 #usado para calcular o valor enviado aos motores
 qtdeRuaEsperada = 70000 #qtos pixels de rua se espera ver
-thresholdSemaforo = 1000 #qtos pixels para se considerar um semaforo
-thresholdSinal = 500 #qtos pixels para se considerar sinal do semaforo
+thresholdSemaforo = 800 #qtos pixels para se considerar um semaforo
+thresholdSinal = 400 #qtos pixels para se considerar sinal do semaforo
 
 #cor detectada - em branco
 #0-preto / 1-branco
+
 
 #funcao que recebe uma imagem e varios intervalos e retorna em branco a deteccao de todos os intervalos na imagem
 def detectaHSV(img,*intervalos):
@@ -50,6 +51,8 @@ def detectaHSV(img,*intervalos):
         maskAux = cv.inRange(hsv,intervalo[0],intervalo[1])
         mask = cv.bitwise_or(mask,maskAux)
     return mask
+
+
 
 #faz uma ROI com o lado direito da imagem
 def ROI_Direito(img):
@@ -96,6 +99,39 @@ def ROIporPorcentagem(img,y1,y2,x1,x2):
     yMax, xMax = img.shape[0:2]
     return img[(yMax*y1)//100:(yMax*y2)//100,(xMax*x1)//100:(xMax*x2)//100]
 
+#retorna o valor do pixel mais proximo 
+def pixelPorPorcentagem(img,y,x):
+	yMax, xMax = img.shape[0:2]
+	return img[yMax*y//100,xMax*x//100]
+
+#retorna limiar para um canal, recebe duas regioes com 3 canais
+def limiarOtimoCanal(roi1,roi2):
+	r1c1,r1c2,r1c3 = cv.split(roi1)
+	r2c1,r2c2,r2c3 = cv.split(roi2)
+	pass
+
+#retorna o limiar para um canal pelo
+def limiarOtimoCanalPixel(canal):
+	
+	valorPixelDireita = pixelPorPorcentagem(canal,50,25)
+	valorPixelEsquerda = pixelPorPorcentagem(canal,50,75)
+	return valorPixelDireita//2+valorPixelEsquerda//2
+
+#faz a calibracao usando funcao acima, retorna limiar que separa cor da
+#direita da tela e da esquerda 
+def calibraHSV(img):
+	hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+	H,S,V = cv.split(hsv)
+
+	thH = limiarOtimoCanal(H)
+	thS = limiarOtimoCanal(S)
+	thV = limiarOtimoCanal(V)
+
+	direita = (np.array([0,0,0]), np.array([thH,thS,thV]))  
+	esquerda = (np.array([thH,thS,thV]), np.array([180,255,255]))  
+
+	return esquerda, direita
+	
 #retorna um booleano que indica se pelo menos um pedestre foi detectado e
 #a imagem com retangulos indicando os pedestres detectados
 def detectaPedestres(img):
@@ -130,6 +166,7 @@ def detectaCarros(img):
 		carroDetectado = True
 		
 	return carroDetectado,img
+	
 #retorna uma imagem vazia (todos os pixels pretos) com as mesmas dimensoes de img
 def imagemVazia(img):
 	return np.zeros((img.shape[0],img.shape[1]),np.uint8)

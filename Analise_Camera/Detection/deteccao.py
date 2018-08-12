@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 from util import *
 #intervalos: rua, calcada, semaforo, vermelho1, vermelho2, amarelo, verde
+
 '''
 img = cv.imread("./images/teste.png")
 
@@ -62,7 +63,7 @@ print(leSemaforo(img))
 '''
 
 #teste de leitura do semaforo da camera
-'''
+
 cap = cv.VideoCapture(0)
 
 while(cap.isOpened()):
@@ -75,10 +76,11 @@ while(cap.isOpened()):
 cap.release()
 cv.destroyAllWindows()
 
-'''
+
+
 
 #teste de deteccao de obstaculos na pista
-
+'''
 cap = cv.VideoCapture(0)
 
 while(cap.isOpened()):
@@ -90,3 +92,45 @@ while(cap.isOpened()):
 
 cap.release()
 cv.destroyAllWindows()
+'''
+
+#tentativa de calibracao
+'''
+cap = cv.VideoCapture(0)
+
+#espera posicionamento
+while(cap.isOpened()):
+	ret,frame = cap.read()	
+	
+	cv.imshow("frame",frame)
+	if cv.waitKey(1) & 0xFF == ord('q'):
+		break
+
+calcada, rua = calibraHSV(frame)
+
+cv.destroyAllWindows()
+
+while(cap.isOpened()):
+	ret,frame = cap.read()
+	#hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)	
+	#H,S,V = cv.split(hsv)
+	
+	detRua = detectaHSV(frame,rua)
+	
+	detCalcada = detectaHSV(frame,calcada)
+	#ret2,thresh = cv.threshold(H,thH,255,cv.THRESH_BINARY)
+	#ret2,thresh = cv.threshold(H,threshold,255,cv.THRESH_BINARY)
+	#ret2,thresh = cv.threshold(H,threshold,255,cv.THRESH_BINARY)
+	#hsv = cv.merge((H,S,V))
+	
+	cv.imshow("Calcada",detCalcada)
+	cv.imshow("Rua",detRua)
+	if cv.waitKey(1) & 0xFF == ord('q'):
+		break
+
+cap.release()
+cv.destroyAllWindows()
+'''
+
+
+
