@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import time
 from util import *
+from controleCarro import *
 
 cap = cv.VideoCapture(0)
 
@@ -15,7 +16,6 @@ while (True):
 
 	#frameDet = detectaHSV(frame, calcada)
 
-	print desvioDoCarro(frame)
 	
 	tamanho = frame.shape
 
@@ -30,9 +30,27 @@ while (True):
 	cv.circle(frame, (x1, y1-100), 2, color, thickness=3, lineType=8, shift=0) 
 
 	
-	cv.imshow('frame',frame)
-
-
+	#cv.imshow('frame',frame)
+	
+	gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)	
+	
+	ret2,binary = cv.threshold(gray, 180,255,cv.THRESH_BINARY)
+	
+	roi = ROIporPorcentagem(binary,50,100,0,100)
+	
+	
+	thrCarro = 5000
+	#print(desvioDoCarro(roi))
+	if desvioDoCarro(roi)>thrCarro:
+		esquerda()
+	elif desvioDoCarro(roi)<-1*thrCarro:
+		direita()
+	else:
+		avanca()
+		
+	#cv.imshow('gray',gray)
+	
+	cv.imshow('binary',binary)
 
 	if cv.waitKey(1) & 0xFF == ord('q'):
 		break

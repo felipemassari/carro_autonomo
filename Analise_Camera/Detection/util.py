@@ -25,6 +25,12 @@ luzVermelha_min2 = np.array([175,170,150])
 luzVermelha_max2 = np.array([180,255,255])
 vermelho2 = (luzVermelha_min2,luzVermelha_max2)
 
+
+ledVermelho_min = np.array([152,23,175]) 
+ledVermelho_max = np.array([180,115,255]) 
+ledVermelho = (ledVermelho_min,ledVermelho_max)
+
+
 luzAmarela_min = np.array([22,170,150])
 luzAmarela_max = np.array([30,255,255])
 amarelo = (luzAmarela_min,luzAmarela_max)
@@ -74,7 +80,7 @@ def desvioDoCarro(img):
     qtdeD = contaPixelsDetectados(roiD)
     qtdeE = contaPixelsDetectados(roiE)
     #valores positivos => desvio para a direita
-    return fatorDesvio*(qtdeD - qtdeE)
+    return fatorDesvio*(qtdeE - qtdeD)
 
 #verifica se existe um objeto na pista, o criterio por enquanto eh se
 #muito da rua estiver bloqueado entao tem um obstaculo, considerando 
@@ -184,7 +190,7 @@ def mostraImg(img):
 
 #retorna o sinal de semaforo detectado mais provavel
 def sinalMaisForte(roi):
-	detVermelho = contaPixelsDetectados(detectaHSV(roi,vermelho1,vermelho2))
+	detVermelho = contaPixelsDetectados(detectaHSV(roi,ledVermelho))
 	detAmarelo = contaPixelsDetectados(detectaHSV(roi,amarelo))
 	detVerde = contaPixelsDetectados(detectaHSV(roi,verde))
 	if detVermelho>detAmarelo and detVermelho>detVerde:
@@ -215,8 +221,15 @@ def semaforoValido(roi,largura,altura):
 #leitura da primeira regiao considerada valida(funcao acima)
 def leSemaforo(img):
 	mask = detectaHSV(img,semaforo)
-	_, contours, _ = cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
-	cor = (255,0,255)
+	
+	#lida com problemas de versao
+	if cv.__version__>3:
+		contours, _ = cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
+
+	else:
+		_, contours, _ = cv.findContours(mask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
+	
+	cor = (255,0,255)#cor do retangulo que encompassa semaforo 
 	
 	#para cada contorno detectado encontra um bounding box
 	for contour in contours:
@@ -230,7 +243,13 @@ def leSemaforo(img):
 			cv.rectangle(img,(x,y),(x+largura, y+altura),cor,2)
 			
 			retangulo = cv.minAreaRect(contour)
-			caixa = cv.boxPoints(retangulo)
+			
+			#lida com problemas de versao
+			if cv.__version__>3:
+				caixa = cv.boxPoints(retangulo)
+			else:
+				caixa = cv.cv.boxPoints(retangulo)
+				
 			caixa = np.int0(caixa)
 			cv.drawContours(img,[caixa],0,cor,3)
 			return sinalMaisForte(roi)

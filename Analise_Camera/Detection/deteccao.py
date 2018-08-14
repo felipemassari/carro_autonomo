@@ -63,7 +63,7 @@ print(leSemaforo(img))
 '''
 
 #teste de leitura do semaforo da camera
-
+'''
 cap = cv.VideoCapture(0)
 
 while(cap.isOpened()):
@@ -76,7 +76,7 @@ while(cap.isOpened()):
 cap.release()
 cv.destroyAllWindows()
 
-
+'''
 
 
 #teste de deteccao de obstaculos na pista
@@ -131,6 +131,72 @@ while(cap.isOpened()):
 cap.release()
 cv.destroyAllWindows()
 '''
+'''
+#testa camera
+cap = cv.VideoCapture(0)
+
+while(cap.isOpened()):
+	ret,frame = cap.read()
+	det = detectaHSV(frame,semaforo)
+	
+	cv.imshow("frame",det)
+	if cv.waitKey(1) & 0xFF == ord('q'):
+		break
+
+cap.release()
+cv.destroyAllWindows()
+'''
+
+luzVermelha_min1 = np.array([0,0,130])
+luzVermelha_max1 = np.array([18,150,255])
+vermelho1 = (luzVermelha_min1,luzVermelha_max1)
+
+luzVermelha_min2 = np.array([150,0,130]) 
+luzVermelha_max2 = np.array([180,150,255])
+vermelho2 = (luzVermelha_min2,luzVermelha_max2)
+
+branco1= np.array([0,0,207])
+branco2= np.array([180,60,255])
+brancoDet = (branco1,branco2)
+
+preto1=np.array([0,0,0])
+preto2=np.array([180,255,45])
+preto=(preto1,preto2)
 
 
+cap = cv.VideoCapture(0)
+
+while(cap.isOpened()):
+	ret,frame = cap.read()
+	#det = detectaHSV(frame,semaforo)
+	branco = detectaHSV(frame,brancoDet)
+	
+	kernel = np.ones((5,5),np.uint8)
+	branco = cv.erode(branco,kernel,iterations = 5)
+	branco = cv.dilate(branco,kernel,iterations = 5)
+	
+	#branco = cv.bitwise_not(branco)
+	blur = cv.GaussianBlur(branco,(5,5),0)
+	
+	branco = cv.bitwise_and(branco,branco,mask=blur)
+	
+	
+	gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
+	ret2,binary = cv.threshold(gray, 140,255,cv.THRESH_BINARY)
+	
+	detPreto = detectaHSV(frame, preto)
+	
+	kernel = np.ones((7,7),np.uint8)
+	
+	detPreto = cv.dilate(detPreto,kernel,iterations = 3)
+
+	sem = cv.bitwise_and(frame,frame,mask=detPreto)
+	print(sinalMaisForte(sem))
+	cv.imshow("preto",sem)
+	#cv.imshow("frame",branco)
+	if cv.waitKey(1) & 0xFF == ord('q'):
+		break
+
+cap.release()
+cv.destroyAllWindows()
 
